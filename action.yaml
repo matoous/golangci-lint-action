@@ -1,0 +1,13 @@
+name: 'GolangCI-Lint Action'
+description: 'Lint your Go code with GolangCI-Lint'
+author: 'Matouš Dzivjak'
+branding:
+  icon: 'code'
+  color: 'blue'
+inputs:
+  config:
+    description: 'Path of the GolangCI-Lint config file'
+    required: false
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
