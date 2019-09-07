@@ -119,18 +119,14 @@ type Report struct {
 func createAnnotations(issues []result.Issue) []*github.CheckRunAnnotation {
 	ann := make([]*github.CheckRunAnnotation, len(issues))
 	for i, f := range issues {
-		var level string
-		level = "failure"
 		r := f.GetLineRange()
 		ann[i] = &github.CheckRunAnnotation{
 			Path:            github.String(f.Pos.Filename),
 			StartLine:       github.Int(r.From),
 			EndLine:         github.Int(r.To),
-			AnnotationLevel: github.String(level),
-			Title: github.String(
-				fmt.Sprintf("%s", f.FromLinter),
-			),
-			Message: github.String(f.Text),
+			AnnotationLevel: github.String("failure"),
+			Title:           github.String(f.FromLinter),
+			Message:         github.String(f.Text),
 		}
 	}
 

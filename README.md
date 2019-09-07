@@ -24,7 +24,7 @@ Configuration
 ```YAML
   with:
     # Path to your GolangCI-Lint config within the repo (optional)
-    config: revive/.golangci-lint.yaml
+    config: .golangci.yml
   env:
     # GitHub token for annotations (optional)
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
