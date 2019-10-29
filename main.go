@@ -131,12 +131,16 @@ func createAnnotations(issues []result.Issue) []*github.CheckRunAnnotation {
 }
 
 func pushFailures(check *github.CheckRun, failures []result.Issue) error {
+	failuresCount := len(failures)
+	if len(failures) > 50 {
+		failures = failures[:50]
+	}
 	opts := github.UpdateCheckRunOptions{
 		Name:    name,
 		HeadSHA: github.String(headSHA),
 		Output: &github.CheckRunOutput{
 			Title:       github.String("Result"),
-			Summary:     github.String(fmt.Sprintf("%d errors", len(failures))),
+			Summary:     github.String(fmt.Sprintf("%d errors", failuresCount)),
 			Annotations: createAnnotations(failures),
 		},
 	}
