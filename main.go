@@ -16,8 +16,9 @@ import (
 const name = "GolangCI-Lint Action"
 
 const (
-	envRepo  = "GITHUB_REPOSITORY"
-	envSHA   = "GITHUB_SHA"
+	envRepo = "GITHUB_REPOSITORY"
+	envSHA  = "GITHUB_SHA"
+	//nolint:gosec
 	envToken = "GITHUB_TOKEN"
 )
 
@@ -30,27 +31,24 @@ var (
 
 var client *github.Client
 
-func init() {
+func loadConfig() error {
 	if env := os.Getenv(envToken); env != "" {
 		ghToken = env
 	} else {
-		fmt.Fprintln(os.Stderr, "Missing environment variable:", envToken)
-		os.Exit(2)
+		return fmt.Errorf("missing environment variable: %s", envToken)
 	}
 
 	if env := os.Getenv(envRepo); env != "" {
 		s := strings.SplitN(env, "/", 2)
 		repoOwner, repoName = s[0], s[1]
 	} else {
-		fmt.Fprintln(os.Stderr, "Missing environment variable:", envRepo)
-		os.Exit(2)
+		return fmt.Errorf("missing environment variable: %s", envRepo)
 	}
 
 	if env := os.Getenv(envSHA); env != "" {
 		headSHA = env
 	} else {
-		fmt.Fprintln(os.Stderr, "Missing environment variable:", envSHA)
-		os.Exit(2)
+		return fmt.Errorf("missing environment variable: %s", envSHA)
 	}
 
 	tc := oauth2.NewClient(context.Background(), oauth2.StaticTokenSource(
@@ -58,9 +56,10 @@ func init() {
 	))
 
 	client = github.NewClient(tc)
+	return nil
 }
 
-func createCheck() *github.CheckRun {
+func createCheck() (*github.CheckRun, error) {
 	opts := github.CreateCheckRunOptions{
 		Name:    name,
 		HeadSHA: headSHA,
@@ -72,11 +71,10 @@ func createCheck() *github.CheckRun {
 
 	check, _, err := client.Checks.CreateCheckRun(ctx, repoOwner, repoName, opts)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "Error while creating check-run:", err)
-		os.Exit(1)
+		return nil, fmt.Errorf("error while creating check-run: %s", err)
 	}
 
-	return check
+	return check, nil
 }
 
 type conclusion int
@@ -90,7 +88,7 @@ func (c conclusion) String() string {
 	return [...]string{"success", "failure"}[c]
 }
 
-func completeCheck(check *github.CheckRun, concl conclusion, errCount int) {
+func completeCheck(check *github.CheckRun, concl conclusion, errCount int) error {
 	opts := github.UpdateCheckRunOptions{
 		Name:       name,
 		HeadSHA:    github.String(headSHA),
@@ -104,11 +102,10 @@ func completeCheck(check *github.CheckRun, concl conclusion, errCount int) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	if _, _, err := client.Checks.UpdateCheckRun(
-		ctx, repoOwner, repoName, check.GetID(), opts); err != nil {
-		fmt.Fprintln(os.Stderr, "Error while completing check-run:", err)
-		os.Exit(1)
+	if _, _, err := client.Checks.UpdateCheckRun(ctx, repoOwner, repoName, check.GetID(), opts); err != nil {
+		return fmt.Errorf("error while completing check-run: %s", err)
 	}
+	return nil
 }
 
 // Report contains the data returned by golangci lint parsed from json
@@ -118,22 +115,22 @@ type Report struct {
 
 func createAnnotations(issues []result.Issue) []*github.CheckRunAnnotation {
 	ann := make([]*github.CheckRunAnnotation, len(issues))
-	for i, f := range issues {
-		r := f.GetLineRange()
+	for i := range issues {
+		r := issues[i].GetLineRange()
 		ann[i] = &github.CheckRunAnnotation{
-			Path:            github.String(f.Pos.Filename),
+			Path:            github.String(issues[i].Pos.Filename),
 			StartLine:       github.Int(r.From),
 			EndLine:         github.Int(r.To),
 			AnnotationLevel: github.String("failure"),
-			Title:           github.String(f.FromLinter),
-			Message:         github.String(f.Text),
+			Title:           github.String(issues[i].FromLinter),
+			Message:         github.String(issues[i].Text),
 		}
 	}
 
 	return ann
 }
 
-func pushFailures(check *github.CheckRun, failures []result.Issue) {
+func pushFailures(check *github.CheckRun, failures []result.Issue) error {
 	opts := github.UpdateCheckRunOptions{
 		Name:    name,
 		HeadSHA: github.String(headSHA),
@@ -147,17 +144,22 @@ func pushFailures(check *github.CheckRun, failures []result.Issue) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	if _, _, err := client.Checks.UpdateCheckRun(
-		ctx, repoOwner, repoName, check.GetID(), opts); err != nil {
-		fmt.Fprintln(os.Stderr, "Error while updating check-run:", err)
-		os.Exit(1)
+	if _, _, err := client.Checks.UpdateCheckRun(ctx, repoOwner, repoName, check.GetID(), opts); err != nil {
+		return fmt.Errorf("error while updating check-run: %s", err)
 	}
+	return nil
 }
 
 func main() {
-	concl := conclSuccess
+	if err := loadConfig(); err != nil {
+		panic(err)
+	}
 
-	check := createCheck()
+	concl := conclSuccess
+	check, err := createCheck()
+	if err != nil {
+		panic(err)
+	}
 
 	var report Report
 	dec := json.NewDecoder(os.Stdin)
@@ -167,9 +169,14 @@ func main() {
 
 	if len(report.Issues) > 0 {
 		concl = conclFailure
-		pushFailures(check, report.Issues)
+		if err := pushFailures(check, report.Issues); err != nil {
+			panic(err)
+		}
 	}
-	completeCheck(check, concl, len(report.Issues))
+
+	if err := completeCheck(check, concl, len(report.Issues)); err != nil {
+		panic(err)
+	}
 
 	if concl == conclSuccess {
 		fmt.Println("Successful run")

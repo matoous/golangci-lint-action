@@ -28,5 +28,6 @@ linters:
   enable-all: true
   disable:
     # prealloc is not recommended by `golangci-lint` developers.
+    - wsl
     - prealloc
     - gochecknoglobals
