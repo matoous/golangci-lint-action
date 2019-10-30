@@ -6,21 +6,28 @@ This Action runs [GolangCI-Lint](https://github.com/golangci/golangci-lint) on y
 ## Usage
 
 Checkout
+
 ```YAML
 - name: Check out code into the Go module directory
-  uses: actions/checkout@v1
+  uses: actions/checkout@v1.1.0
 ```
+
 Use by building from repository
+
 ```YAML
 - name: Run GolangCI-Lint Action by building from repository
-  uses: matoous/golangci-lint-action@v1
+  uses: matoous/golangci-lint-action@v1.1.0
 ```
+
 Use by pulling pre-built image *(faster execution time, less secure)*
+
 ```YAML
 - name: Run GolangCI-Lint Action by pulling pre-built image
-  uses: docker://matoous/golangci-lint-action:v1
+  uses: docker://matoous/golangci-lint-action:v1.1.0
 ```
+
 Configuration
+
 ```YAML
   with:
     # Path to your GolangCI-Lint config within the repo (optional)
