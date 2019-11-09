@@ -4,7 +4,9 @@ set -e
 
 OUT_FORMAT=${OUT_FORMAT:-json}
 cd "$GITHUB_WORKSPACE"
+
 ls -alt
+
 go env
 
 if [ ! -z "${INPUT_CONFIG}" ]; then CONFIG="--config $INPUT_CONFIG"; fi
