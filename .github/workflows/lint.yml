@@ -27,8 +27,9 @@ jobs:
         with:
           config: .golangci.yml
         env:
-          WORKING_DIRECTORY: .
+          WORKING_DIRECTORY: ${{ github.workspace }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OUT_FORMAT: tab
       - name: Run GolangCI-Lint as remote action
         uses: matoous/golangci-lint-action@v1.1.0
         with:
