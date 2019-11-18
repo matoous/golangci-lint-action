@@ -3,7 +3,7 @@
 set -e
 
 OUT_FORMAT=${OUT_FORMAT:-json}
-cd "$GITHUB_WORKSPACE"
+cd "$WORKING_DIRECTORY"
 
 if [ ! -z "${INPUT_CONFIG}" ]; then CONFIG="--config $INPUT_CONFIG"; fi
 
