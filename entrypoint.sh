@@ -2,6 +2,7 @@
 
 set -e
 
+
 OUT_FORMAT=${OUT_FORMAT:-json}
 cd "$WORKING_DIRECTORY"
 
