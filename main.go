@@ -31,6 +31,8 @@ var (
 
 const defaultRequestTimeout = 30 * time.Second
 
+const maxFailureCount = 50
+
 var client *github.Client
 
 func loadConfig() error {
@@ -134,8 +136,8 @@ func createAnnotations(issues []result.Issue) []*github.CheckRunAnnotation {
 
 func pushFailures(check *github.CheckRun, failures []result.Issue) error {
 	failuresCount := len(failures)
-	if len(failures) > 50 {
-		failures = failures[:50]
+	if failuresCount > maxFailureCount {
+		failures = failures[:maxFailureCount]
 	}
 	opts := github.UpdateCheckRunOptions{
 		Name:    name,
