@@ -29,6 +29,8 @@ var (
 	headSHA   string
 )
 
+const defaultRequestTimeout = 30 * time.Second
+
 var client *github.Client
 
 func loadConfig() error {
@@ -66,7 +68,7 @@ func createCheck() (*github.CheckRun, error) {
 		Status:  github.String("in_progress"),
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), defaultRequestTimeout)
 	defer cancel()
 
 	check, _, err := client.Checks.CreateCheckRun(ctx, repoOwner, repoName, opts)
@@ -99,7 +101,7 @@ func completeCheck(check *github.CheckRun, concl conclusion, errCount int) error
 		},
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), defaultRequestTimeout)
 	defer cancel()
 
 	if _, _, err := client.Checks.UpdateCheckRun(ctx, repoOwner, repoName, check.GetID(), opts); err != nil {
@@ -145,7 +147,7 @@ func pushFailures(check *github.CheckRun, failures []result.Issue) error {
 		},
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), defaultRequestTimeout)
 	defer cancel()
 
 	if _, _, err := client.Checks.UpdateCheckRun(ctx, repoOwner, repoName, check.GetID(), opts); err != nil {
