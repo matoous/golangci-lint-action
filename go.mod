@@ -1,4 +1,4 @@
-module github.com/morphy2k/revive-action
+module github.com/matoous/golangci-lint-action
 
 go 1.13
 
