@@ -1,4 +1,4 @@
-FROM golang:1.13.4
+FROM golang:1.13.5
 
 LABEL repository="https://github.com/matoous/golangci-lint-action"
 LABEL homepage="https://github.com/matoous/golangci-lint-action"
@@ -9,11 +9,20 @@ LABEL com.github.actions.description="Lint your Go code with GolangCI Lint"
 LABEL com.github.actions.icon="code"
 LABEL com.github.actions.color="blue"
 
+ARG golangci_lint_version=1.21.0
+
 ENV GOPROXY https://proxy.golang.org
 
-RUN go get -v github.com/golangci/golangci-lint/cmd/golangci-lint
-RUN go get -v github.com/matoous/golangci-lint-action
+# NOTE: GolangCI-Lint README says "Please, do not install golangci-lint by go get"
+# See: https://github.com/golangci/golangci-lint#go
+RUN curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v${golangci_lint_version}
 
+# Install from this repository
+ADD . /source
+WORKDIR /source
+RUN go install .
+
+WORKDIR /
 COPY entrypoint.sh /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
