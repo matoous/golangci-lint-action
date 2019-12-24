@@ -8,6 +8,14 @@ inputs:
   config:
     description: 'Path of the GolangCI-Lint config file'
     required: false
+  basePath:
+    description: Path of the Golang project root directory
+    required: false
+    default: ${{ github.workspace }}
+  githubToken:
+    description: Github Token
+    required: false
+    default: ${{ secrets.GITHUB_TOKEN }}
 runs:
   using: 'docker'
   image: 'Dockerfile'

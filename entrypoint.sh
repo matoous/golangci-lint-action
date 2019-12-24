@@ -2,7 +2,11 @@
 
 set -e
 
-cd "$GITHUB_WORKSPACE"
+if [ ! -z "$INPUT_BASEPATH" ]; then
+  cd "$GITHUB_WORKSPACE/$INPUT_BASEPATH"
+fi
+  cd "$GITHUB_WORKSPACE"
+fi
 
 if [ ! -z "${INPUT_CONFIG}" ]; then CONFIG="--config $INPUT_CONFIG"; fi
 
