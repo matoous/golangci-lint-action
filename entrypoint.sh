@@ -4,7 +4,7 @@ set -e
 
 if [ ! -z "$INPUT_BASEPATH" ]; then
   cd "$GITHUB_WORKSPACE/$INPUT_BASEPATH"
-fi
+else
   cd "$GITHUB_WORKSPACE"
 fi
 
