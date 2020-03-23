@@ -1,3 +1,7 @@
+# IMPORTANT
+
+This repository is depracated, please use [https://github.com/actions-contrib/golangci-lint](https://github.com/actions-contrib/golangci-lint) instead.
+
 [![Dependabot status](https://api.dependabot.com/badges/status?host=github&repo=matoous/golangci-lint-action)](https://dependabot.com/)
 
 # GolangCI-Lint Action
