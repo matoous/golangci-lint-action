@@ -1,4 +1,4 @@
-FROM golang:1.13.7
+FROM golang:1.14.1
 
 LABEL repository="https://github.com/matoous/golangci-lint-action"
 LABEL homepage="https://github.com/matoous/golangci-lint-action"
