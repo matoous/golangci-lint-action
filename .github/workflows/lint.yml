@@ -22,9 +22,18 @@ jobs:
       - name: Check out code into the Go module directory
         uses: actions/checkout@v1
 
-      - name: Run GolangCI-Lint
+      - name: Run GolangCI-Lint locally
         uses: ./
         with:
           config: .golangci.yml
         env:
+          WORKING_DIRECTORY: ${{ github.workspace }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OUT_FORMAT: tab
+      - name: Run GolangCI-Lint as remote action
+        uses: matoous/golangci-lint-action@master
+        with:
+          config: .golangci.yml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OUT_FORMAT: tab
